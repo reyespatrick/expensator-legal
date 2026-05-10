@@ -3,28 +3,368 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Expensator</title>
+<title>Expensator — Track expenses without the paperwork</title>
+<meta name="description" content="Scan a receipt, it's logged. See your month at a glance, separate Personal and Business, export to PDF or CSV. All in seconds, on your iPhone. Privacy by default.">
+<meta name="theme-color" content="#625bf4">
+<link rel="icon" href="img/icon.png">
+<meta property="og:title" content="Expensator — Track expenses without the paperwork">
+<meta property="og:description" content="Scan a receipt, it's logged. Personal and Business in one app. PDF & CSV export. Your data stays on your iPhone.">
+<meta property="og:image" content="img/icon.png">
+<meta property="og:type" content="website">
 <style>
-  :root { --fg:#0e1733; --muted:#5a6178; --bg:#fafbff; --accent:#625bf4; }
+  :root {
+    --fg:#0e1733;
+    --muted:#5a6178;
+    --bg:#fafbff;
+    --bg-alt:#f2f3fb;
+    --accent:#625bf4;
+    --accent-2:#8a83ff;
+    --card:#fff;
+    --shadow:0 1px 3px rgba(14,23,51,.06), 0 8px 32px rgba(14,23,51,.06);
+    --radius:14px;
+  }
   * { box-sizing:border-box }
-  body { font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-         color:var(--fg); background:var(--bg); margin:0; padding:48px 24px; }
-  main { max-width:720px; margin:0 auto; }
-  h1 { font-size:42px; margin:0 0 8px; letter-spacing:-0.02em; }
-  .tag { color:var(--muted); margin-bottom:48px; }
-  nav a { display:inline-block; margin-right:18px; color:var(--accent); text-decoration:none; font-weight:500; }
-  nav a:hover { text-decoration:underline; }
-  footer { margin-top:64px; color:var(--muted); font-size:14px; }
+  html { scroll-behavior:smooth }
+  body {
+    font:16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    color:var(--fg); background:var(--bg); margin:0;
+    -webkit-font-smoothing:antialiased;
+  }
+  a { color:var(--accent); text-decoration:none }
+  a:hover { text-decoration:underline }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 24px }
+  h1, h2, h3 { letter-spacing:-0.02em; margin:0 }
+  p { margin:0 }
+
+  /* nav */
+  header.nav {
+    position:sticky; top:0; z-index:10;
+    background:rgba(250,251,255,.85);
+    backdrop-filter:saturate(180%) blur(14px);
+    -webkit-backdrop-filter:saturate(180%) blur(14px);
+    border-bottom:1px solid rgba(14,23,51,.06);
+  }
+  .nav-inner { display:flex; align-items:center; justify-content:space-between; padding:14px 0 }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:600; color:var(--fg) }
+  .brand img { width:28px; height:28px; border-radius:7px }
+  .nav-cta {
+    display:inline-flex; align-items:center; gap:8px;
+    background:#000; color:#fff; padding:8px 14px; border-radius:999px;
+    font-weight:500; font-size:14px;
+  }
+  .nav-cta:hover { text-decoration:none; background:#1a1a1a }
+  .nav-cta svg { width:14px; height:14px }
+
+  /* hero */
+  .hero {
+    padding:72px 0 48px;
+    background:
+      radial-gradient(60% 50% at 80% 0%, rgba(98,91,244,.12), transparent 70%),
+      radial-gradient(40% 40% at 0% 30%, rgba(138,131,255,.10), transparent 70%);
+  }
+  .hero-grid {
+    display:grid; grid-template-columns: 1.1fr 1fr; gap:48px; align-items:center;
+  }
+  .eyebrow {
+    display:inline-block;
+    background:rgba(98,91,244,.10); color:var(--accent);
+    padding:5px 12px; border-radius:999px;
+    font-size:13px; font-weight:600; letter-spacing:.01em;
+    margin-bottom:20px;
+  }
+  .hero h1 {
+    font-size:56px; line-height:1.05; font-weight:700;
+    margin-bottom:18px;
+  }
+  .hero h1 .grad {
+    background:linear-gradient(120deg, var(--accent), var(--accent-2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero .lede { font-size:19px; color:var(--muted); margin-bottom:28px; max-width:520px }
+  .cta-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center }
+  .btn-app {
+    display:inline-flex; align-items:center; gap:12px;
+    background:#000; color:#fff; padding:12px 22px; border-radius:14px;
+    font-weight:500; font-size:16px;
+  }
+  .btn-app:hover { text-decoration:none; background:#1a1a1a }
+  .btn-app svg { width:24px; height:24px }
+  .btn-app .small { font-size:11px; opacity:.85; line-height:1; margin-bottom:2px; text-transform:uppercase; letter-spacing:.05em }
+  .btn-app .big { font-size:19px; line-height:1; font-weight:600 }
+  .ghost-link { color:var(--muted); font-size:14px; padding:8px 4px }
+
+  .hero-shot {
+    position:relative;
+    display:flex; justify-content:center; align-items:flex-end;
+  }
+  .phone {
+    width:280px; aspect-ratio: 1284/2778;
+    border-radius:38px; overflow:hidden;
+    background:#000; padding:8px;
+    box-shadow: 0 30px 60px -20px rgba(14,23,51,.30), 0 0 0 1px rgba(14,23,51,.08);
+    transform: rotate(-2deg);
+  }
+  .phone img { width:100%; height:100%; object-fit:cover; border-radius:30px; display:block }
+
+  /* trust strip */
+  .trust {
+    background:var(--bg-alt);
+    padding:18px 0;
+    border-top:1px solid rgba(14,23,51,.06);
+    border-bottom:1px solid rgba(14,23,51,.06);
+  }
+  .trust-row {
+    display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px 28px;
+    color:var(--muted); font-size:14px;
+  }
+  .trust-row span { display:inline-flex; align-items:center; gap:6px }
+  .trust-row .dot { width:5px; height:5px; background:var(--accent); border-radius:50%; opacity:.5 }
+
+  /* sections */
+  section { padding:80px 0 }
+  section h2 { font-size:36px; margin-bottom:14px }
+  section .sub { color:var(--muted); font-size:18px; margin-bottom:48px; max-width:640px }
+
+  /* feature grid */
+  .features { display:grid; grid-template-columns:repeat(3, 1fr); gap:20px }
+  .feat {
+    background:var(--card); border-radius:var(--radius); padding:28px;
+    box-shadow:var(--shadow); border:1px solid rgba(14,23,51,.04);
+  }
+  .feat .icon {
+    width:42px; height:42px; border-radius:10px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    margin-bottom:16px;
+  }
+  .feat .icon svg { width:22px; height:22px }
+  .feat h3 { font-size:18px; margin-bottom:8px }
+  .feat p { color:var(--muted); font-size:15px }
+
+  /* screenshots showcase */
+  .showcase {
+    background:linear-gradient(180deg, var(--bg) 0%, var(--bg-alt) 100%);
+  }
+  .shots {
+    display:flex; gap:24px; overflow-x:auto;
+    padding:8px 4px 32px;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+  .shots::-webkit-scrollbar { height:8px }
+  .shots::-webkit-scrollbar-thumb { background:rgba(14,23,51,.15); border-radius:4px }
+  .shot {
+    flex:0 0 auto; width:240px; scroll-snap-align:start;
+    text-align:center;
+  }
+  .shot .frame {
+    width:240px; aspect-ratio:1284/2778;
+    border-radius:34px; overflow:hidden;
+    background:#000; padding:7px;
+    box-shadow:0 20px 40px -16px rgba(14,23,51,.25), 0 0 0 1px rgba(14,23,51,.08);
+    margin-bottom:14px;
+  }
+  .shot .frame img { width:100%; height:100%; object-fit:cover; border-radius:27px; display:block }
+  .shot .caption { color:var(--muted); font-size:14px; padding:0 8px }
+
+  /* privacy callout */
+  .privacy-callout {
+    background:linear-gradient(135deg, #0e1733, #1a2350);
+    color:#fff; border-radius:24px; padding:56px;
+    display:grid; grid-template-columns:1.2fr 1fr; gap:48px; align-items:center;
+  }
+  .privacy-callout h2 { font-size:32px; margin-bottom:14px }
+  .privacy-callout p { color:rgba(255,255,255,.75); font-size:17px }
+  .privacy-callout a { color:#a8a3ff }
+  .checks { list-style:none; padding:0; margin:0 }
+  .checks li {
+    padding:10px 0; display:flex; align-items:flex-start; gap:12px;
+    color:rgba(255,255,255,.92); font-size:15px;
+    border-top:1px solid rgba(255,255,255,.10);
+  }
+  .checks li:first-child { border-top:none }
+  .checks .check {
+    flex:0 0 22px; width:22px; height:22px; border-radius:50%;
+    background:rgba(168,163,255,.20); color:#a8a3ff;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .checks .check svg { width:12px; height:12px }
+
+  /* CTA section */
+  .cta {
+    text-align:center; padding:96px 0;
+  }
+  .cta h2 { font-size:42px; margin-bottom:14px }
+  .cta p { color:var(--muted); font-size:18px; margin-bottom:32px }
+
+  /* footer */
+  footer.foot {
+    border-top:1px solid rgba(14,23,51,.06); padding:36px 0;
+    color:var(--muted); font-size:14px;
+  }
+  .foot-inner { display:flex; flex-wrap:wrap; gap:14px 28px; justify-content:space-between; align-items:center }
+  .foot nav a { margin-right:18px }
+
+  /* responsive */
+  @media (max-width: 800px) {
+    .hero { padding:48px 0 24px }
+    .hero h1 { font-size:38px }
+    .hero .lede { font-size:17px }
+    .hero-grid { grid-template-columns:1fr; gap:32px }
+    .hero-shot { order:2 }
+    .phone { width:230px; transform:none }
+    section { padding:56px 0 }
+    section h2 { font-size:28px }
+    .features { grid-template-columns:1fr }
+    .privacy-callout { padding:32px; grid-template-columns:1fr; gap:24px }
+    .cta { padding:64px 0 }
+    .cta h2 { font-size:30px }
+  }
 </style>
 </head>
-<body><main>
-  <h1>Expensator</h1>
-  <p class="tag">Track expenses without the paperwork.</p>
-  <nav>
-    <a href="privacy.html">Privacy policy</a>
-    <a href="support.html">Support</a>
-    <a href="terms.html">Terms</a>
-  </nav>
-  <footer>© Patrick Reyes · Switzerland</footer>
-</main></body>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="brand">
+      <img src="img/icon.png" alt="">
+      <span>Expensator</span>
+    </a>
+    <a class="nav-cta" href="https://apps.apple.com/app/id6766997749">
+      <svg viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM236.4 95.5c19.6-23.3 17.8-44.5 17.2-52.2-17.3 1-37.3 11.8-48.7 25.1-12.6 14.3-20 32-18.4 51.2 18.7 1.4 35.7-8.2 49.9-24.1z"/></svg>
+      <span>App Store</span>
+    </a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">iPhone · Privacy-first · Made in Switzerland</span>
+      <h1>Track expenses <span class="grad">without the paperwork.</span></h1>
+      <p class="lede">Scan a receipt — the amount and merchant fill in automatically. See your month at a glance, separate Personal and Business, export to PDF or CSV. All in seconds, right on your iPhone.</p>
+      <div class="cta-row">
+        <a class="btn-app" href="https://apps.apple.com/app/id6766997749">
+          <svg viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM236.4 95.5c19.6-23.3 17.8-44.5 17.2-52.2-17.3 1-37.3 11.8-48.7 25.1-12.6 14.3-20 32-18.4 51.2 18.7 1.4 35.7-8.2 49.9-24.1z"/></svg>
+          <div style="text-align:left">
+            <div class="small">Download on the</div>
+            <div class="big">App Store</div>
+          </div>
+        </a>
+        <a class="ghost-link" href="#features">Explore features →</a>
+      </div>
+    </div>
+    <div class="hero-shot">
+      <div class="phone"><img src="img/shot-home.png" alt="Expensator home screen showing the monthly overview"></div>
+    </div>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="wrap trust-row">
+    <span>No account required</span><span class="dot"></span>
+    <span>No ads, no tracking</span><span class="dot"></span>
+    <span>Works offline</span><span class="dot"></span>
+    <span>Native CHF support</span><span class="dot"></span>
+    <span>Face ID protection</span>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Designed for daily use.</h2>
+    <p class="sub">Built for the moment between paying and forgetting. Open the app, log it, move on.</p>
+    <div class="features">
+      <div class="feat">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M9 3l1 2h4l1 2"/></svg></div>
+        <h3>Scan and done</h3>
+        <p>Point the camera at a receipt — the total and merchant fill in for you, on-device, in under three seconds.</p>
+      </div>
+      <div class="feat">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-4 4 4 6-6 4 4"/><path d="M3 21h18"/></svg></div>
+        <h3>See where it goes</h3>
+        <p>Monthly totals, daily averages, category breakdowns and weekly trends. The story your bank statement won't tell you.</p>
+      </div>
+      <div class="feat">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="15" r="6"/></svg></div>
+        <h3>Personal and Business</h3>
+        <p>Two separate books in one app. One tap to switch — exports, budgets and reports follow the context.</p>
+      </div>
+      <div class="feat">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M19 8v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7z"/><path d="M9 13h6M9 17h6"/></svg></div>
+        <h3>Export in one tap</h3>
+        <p>Generate a PDF report your accountant will actually like, or a CSV for Excel, Numbers or Sheets. Email it directly.</p>
+      </div>
+      <div class="feat">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Privacy by default</h3>
+        <p>No backend, no account, no analytics. Your expenses live on your iPhone. Face ID locks the door.</p>
+      </div>
+      <div class="feat">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <h3>Recurring &amp; budgets</h3>
+        <p>Set monthly subscriptions once, get budgets per category, and let the app surface what's drifting before the month ends.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="wrap">
+    <h2>A closer look.</h2>
+    <p class="sub">Six taps from open to filed. Swipe to scroll.</p>
+    <div class="shots">
+      <div class="shot"><div class="frame"><img src="img/shot-home.png" alt=""></div><div class="caption">Your expenses at a glance</div></div>
+      <div class="shot"><div class="frame"><img src="img/shot-entry.png" alt=""></div><div class="caption">Log a receipt in seconds</div></div>
+      <div class="shot"><div class="frame"><img src="img/shot-expenses.png" alt=""></div><div class="caption">Browse, filter, find</div></div>
+      <div class="shot"><div class="frame"><img src="img/shot-reports.png" alt=""></div><div class="caption">See where your money goes</div></div>
+      <div class="shot"><div class="frame"><img src="img/shot-budgets.png" alt=""></div><div class="caption">Budgets per category</div></div>
+      <div class="shot"><div class="frame"><img src="img/shot-settings.png" alt=""></div><div class="caption">Yours, on your terms</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="privacy-callout">
+      <div>
+        <h2>Your data never leaves your phone.</h2>
+        <p>Expensator has no backend. No account. No analytics SDK. No advertising tracker. Your receipts, merchants, budgets and notes live in a local database on your iPhone — when you uninstall the app, iOS deletes everything. Read the full <a href="privacy.html">privacy policy</a>.</p>
+      </div>
+      <ul class="checks">
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>No account, ever</li>
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Receipt OCR runs on-device</li>
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Face ID locks the app</li>
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>No third-party SDKs</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Take control of your spending,<br>a few seconds at a time.</h2>
+    <p>Free to download. No subscription required for the essentials.</p>
+    <a class="btn-app" href="https://apps.apple.com/app/id6766997749">
+      <svg viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM236.4 95.5c19.6-23.3 17.8-44.5 17.2-52.2-17.3 1-37.3 11.8-48.7 25.1-12.6 14.3-20 32-18.4 51.2 18.7 1.4 35.7-8.2 49.9-24.1z"/></svg>
+      <div style="text-align:left">
+        <div class="small">Download on the</div>
+        <div class="big">App Store</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <nav>
+      <a href="privacy.html">Privacy</a>
+      <a href="support.html">Support</a>
+      <a href="terms.html">Terms</a>
+    </nav>
+    <div>© Patrick Reyes · Switzerland</div>
+  </div>
+</footer>
+
+</body>
 </html>
